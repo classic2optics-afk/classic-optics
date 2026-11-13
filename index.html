@@ -469,7 +469,7 @@ $("same").addEventListener("change",function(){
   if(this.checked){w.value=$("f-phone").value;w.disabled=true}else w.disabled=false;
 });
 $("f-phone").addEventListener("input",function(){if($("same").checked)$("f-wa").value=this.value});
-var ORDER_EMAIL="mennaqw653@gmail.com",QK="co_pending_v1";
+var SCRIPT_URL="https://script.google.com/macros/s/AKfycby-KAwTNodYyqIuMMJ-uweGZiCbnHZ6tE3E-_YX81YdcIKrvE9gun_JHOfEmHbl2S_Bvw/exec",QK="co_pending_v1";
 function orderPayload(o){
   var lines=o.items.map(function(c){var p=P[c.s][c.i];return "- "+p.n.ar+" ("+p.n.en+") × "+c.q+" = "+(num(p)*c.q)+" جنيه"}).join("\n");
   var sub=total(o.items),sh=SHIPS[o.gov];
@@ -478,13 +478,16 @@ function orderPayload(o){
     "الاسم":o.name,"الموبايل":o.phone,"الواتساب":o.wa,"المحافظة":GOV.ar[o.gov],"العنوان":o.addr,
     "المنتجات":lines,"إجمالي المنتجات":sub+" جنيه","التوصيل":sh+" جنيه","المطلوب دفعه عند الاستلام":(sub+sh)+" جنيه","طريقة الدفع":"الدفع عند الاستلام"};
   if(o.email)d["إيميل العميل"]=o.email;
+  d.orderNo=o.no;d.date=d["التاريخ"];d.name=o.name;d.phone=o.phone;d.whatsapp=o.wa;d.email=o.email||"";
+  d.governorate=GOV.ar[o.gov];d.address=o.addr;d.products=lines;d.subtotal=sub;d.shipping=sh;d.total=sub+sh;d.payment="الدفع عند الاستلام";
   return d;
 }
 function qGet(){try{return JSON.parse(localStorage.getItem(QK)||"[]")}catch(e){return[]}}
 function qSet(a){try{localStorage.setItem(QK,JSON.stringify(a))}catch(e){}}
 function postOrder(d){
-  return fetch("https://formsubmit.co/ajax/"+ORDER_EMAIL,{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify(d)})
-    .then(function(r){if(!r.ok)throw 0;return r.json()});
+  return fetch(SCRIPT_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(d)})
+    .then(function(r){if(!r.ok)throw 0;return r.json()})
+    .then(function(j){if(!j||!j.ok)throw 0;return j});
 }
 function sendOrder(o){
   var d;try{d=orderPayload(o)}catch(e){return}
